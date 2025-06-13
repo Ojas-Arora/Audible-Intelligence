@@ -22,8 +22,8 @@ body:
       placeholder: |
         - Team Name: Audible Intelligence
         - Member 1: Ojas Arora (ojas.arora14@email.com)
-        - Member 2: Diksha (@email.com)
-        - Member 3: Chitwan (@email.com)
+        - Member 2: Diksha (diksha160404@email.com)
+        - Member 3: Chitwan (chitwan.gujrani@email.com)
     validations:
       required: true
 
@@ -32,7 +32,7 @@ body:
     attributes:
       label: 🧩 Problem Statement
       description: Briefly describe the problem your project aims to solve
-      placeholder: Describe the issue or opportunity you're addressing.
+      placeholder: Traditional acoustic event detection software relies significantly on cloud processing, which results in privacy threats, latency, and poor offline performance. An urgent need exists for an end-to-end, privacy-centered solution that can detect alarms, sirens, or barks accurately in real-time directly on-device—providing low latency, improved security, and smooth performance in low-resource or offline settings.
     validations:
       required: true
 
@@ -41,7 +41,7 @@ body:
     attributes:
       label: 🚀 Motivation
       description: Explain the motivation or background behind choosing this project
-      placeholder: What inspired your team to work on this project?
+      placeholder: The rising demand for smart, context-aware environments inspired us to build a solution that ensures safety and accessibility through sound. Motivated by the DCASE Challenge, we aim to create a real-time, privacy-focused acoustic detection system that works even in low-resource or offline settings—bridging the gap between AI innovation and real-world usability.
     validations:
       required: true
 
@@ -51,9 +51,10 @@ body:
       label: 🎯 Expected Outcome
       description: List the expected outcomes from the project as bullet points
       placeholder: |
-        - Functional AI chatbot interface
-        - API integration with knowledge base
-        - Documentation and user guide
+        - Real-time acoustic event detection app (mobile/web)
+        - User-friendly interface for sound alerts and feedback
+        - Optional dashboard for event monitoring/logging
+        - Complete documentation and deployment guide
     validations:
       required: true
 
@@ -76,9 +77,10 @@ body:
       label: 📦 Final Deliverables
       description: Describe the expected final deliverables at the end of the program
       placeholder: |
-        - Working demo hosted on a public link
-        - Codebase with proper documentation
-        - Presentation explaining the solution
+        - Fully functional mobile/web app for acoustic event detection
+        - Source code with clean documentation and setup guide
+        - Final presentation showcasing the solution and roadmap
+        - Publicly hosted demo link
     validations:
       required: true
 
