@@ -10,7 +10,7 @@ body:
     attributes:
       label: 🧠 Project Title
       description: Briefly describe the title of your project
-      placeholder: e.g. AI-powered Slack FAQ Bot
+      placeholder: Acoustic Source and Event Detection DCASE Challenge-Inspired Smart App 
     validations:
       required: true
 
@@ -20,9 +20,10 @@ body:
       label: 👥 Team Details
       description: Provide the team name, member names, and email addresses
       placeholder: |
-        - Team Name: The Innovators
-        - Member 1: Alice Smith (alice@email.com)
-        - Member 2: Bob Johnson (bob@email.com)
+        - Team Name: Audible Intelligence
+        - Member 1: Ojas Arora (ojas.arora14@email.com)
+        - Member 2: Diksha (@email.com)
+        - Member 3: Chitwan (@email.com)
     validations:
       required: true
 
