@@ -1,5 +1,48 @@
 # AISOC 2025
 
+# Team Name: Audible Intelligence
+
+# 👥 Team Members
+- Member 1: Ojas Arora (ojas.arora14@email.com)
+- Member 2: Diksha (diksha160404@email.com)
+- Member 3: Chitwan (chitwan.gujrani@email.com)
+
+# 🧠 Project Title
+
+Acoustic Source and Event Detection: DCASE Challenge-Inspired Smart App
+
+# 🧩 Assigned Problem Statement
+
+**Project 2: A privacy-first mobile/web application that detects and identifies environmental sounds such as alarms and sirens in real time.**
+
+Traditional acoustic event detection software relies significantly on cloud processing, which results in privacy threats, latency, and poor offline performance. An urgent need exists for an end-to-end, privacy-centered solution that can detect alarms, sirens, or barks accurately in real-time directly on-device—providing low latency, improved security, and smooth performance in low-resource or offline settings.
+Alarms, sirens, barking dogs, and other acoustic events frequently report emergencies or require urgent attention. But current sound detection systems have several basic issues that make them difficult to use in everyday life:
+
+- **They don't work without the internet:** Most apps send sound data to servers for processing, so they stop working in offline or low-network areas.
+
+- **They're often slow:** Sending data to the cloud and waiting for a response can cause delays—dangerous in emergencies.
+
+- **They are too heavy for normal phones:** Some apps use complex models that take too much battery, memory, or time to work on regular devices.
+
+
+To overcome these challenges, our project offers a privacy-oriented, low-latency, and on-device solution for real-time acoustic event detection. We want to solve these problems by building a simple, lightweight mobile/web app that can:
+
+- Detect common and important sounds (like alarms, sirens, and dog barks)
+
+- Operates completely offline or under low-resource settings
+
+- Be fast, so users get alerts in real-time
+
+- Supports real-world deployment on smartphones, IoT devices, or wearables
+
+- Reliably detects important environmental sounds with high accuracy
+
+This app can help in many real situations—like helping people with hearing difficulties, creating smart home systems, or improving safety during emergencies. This project is motivated by the DCASE Challenge, which aims at practical acoustic scene and event detection tasks. In bringing together the latest AI into a mobile/web app, our aim is to make smarter environments possible—on use cases such as home security, elderly care, public safety systems, and accessibility devices for the hearing-impaired.
+
+# A quick start guide with examples to run the code:
+
+Will be Updated Soon.
+
 ## ⚙️ Guidelines
 
 - Each team must **fork this repository** before starting development.
