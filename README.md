@@ -3,9 +3,9 @@
 # Team Name: Audible Intelligence
 
 # 👥 Team Members
-- Member 1: Ojas Arora (ojas.arora14@email.com)
-- Member 2: Diksha (diksha160404@email.com)
-- Member 3: Chitwan (chitwan.gujrani@email.com)
+- Member 1: Ojas Arora (ojas.arora14@gmail.com)
+- Member 2: Diksha (diksha160404@gmail.com)
+- Member 3: Chitwan (chitwan.gujrani@gmail.com)
 
 # 🧠 Project Title
 
