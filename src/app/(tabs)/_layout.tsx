@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Mic, Activity, Settings, ChartBar as BarChart3 } from 'lucide-react-native';
+import { Mic, Activity, Settings, ChartBar as BarChart3, Brain } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useTheme } from '@/components/ThemeProvider';
 
@@ -28,7 +28,7 @@ export default function TabLayout() {
           },
         }}>
         <Tabs.Screen
-          name="dashboard"
+          name="index"
           options={{
             title: 'Dashboard',
             tabBarIcon: ({ size, color }) => (
@@ -37,7 +37,7 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="index"
+          name="detection"
           options={{
             title: 'Detection',
             tabBarIcon: ({ size, color }) => (
@@ -59,7 +59,7 @@ export default function TabLayout() {
           options={{
             title: 'Learning',
             tabBarIcon: ({ size, color }) => (
-              <Activity size={size} color={color} />
+              <Brain size={size} color={color} />
             ),
           }}
         />

@@ -1,466 +1,681 @@
-import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
+import React, { useEffect, useRef } from 'react';
+import { 
+  View, 
+  Text, 
+  ScrollView, 
+  TouchableOpacity, 
+  StyleSheet, 
   Dimensions,
-  Platform,
-  ScrollView,
+  Animated,
+  Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Mic, MicOff, Zap, Shield, Volume2, TriangleAlert as AlertTriangle, Brain, Activity } from 'lucide-react-native';
-import PyTorchModelInterface from '@/components/PyTorchModelInterface';
+import { useRouter } from 'expo-router';
 import { useTheme } from '@/components/ThemeProvider';
-import { useAppSettings } from '@/hooks/useAppSettings';
-import { useLiveEvents } from '@/hooks/useLiveEvents';
+import { Mic, ChartBar as BarChart3, Settings as SettingsIcon, BookOpen, Zap, Shield, Activity, Brain, Waves, Play, TrendingUp, Users, Globe, Sparkles } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width, height } = Dimensions.get('window');
 
-interface DetectedEvent {
-  type: string;
-  confidence: number;
-  timestamp: Date;
-  icon: string;
-  category: string;
-  processing_time_ms?: number;
-}
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
-export default function DetectionScreen() {
-  const { theme, isDark } = useTheme();
-  const { settings } = useAppSettings();
-  const { addEvent } = useLiveEvents();
-  const [isRecording, setIsRecording] = useState(false);
-  const [currentEvent, setCurrentEvent] = useState<DetectedEvent | null>(null);
-  const [audioLevel, setAudioLevel] = useState(0);
-  const [recentEvents, setRecentEvents] = useState<DetectedEvent[]>([]);
-  const [isHovered, setIsHovered] = useState(false);
-  
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const waveAnim = useRef(new Animated.Value(0)).current;
-  const confidenceAnim = useRef(new Animated.Value(0)).current;
+const FloatingParticle = ({ delay = 0 }: { delay?: number }) => {
+  const { theme } = useTheme();
+  const animatedValue = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
-  // Event type mapping with icons and colors
-  const eventTypeMapping = {
-    'dog_bark': { icon: '🐕', color: theme.colors.dogBark },
-    'car_horn': { icon: '🚗', color: theme.colors.carHorn },
-    'alarm': { icon: '🚨', color: theme.colors.alarm },
-    'glass_break': { icon: '🥃', color: theme.colors.glassBreak },
-    'siren': { icon: '🚑', color: theme.colors.siren },
-    'door_slam': { icon: '🚪', color: theme.colors.doorSlam },
-    'footsteps': { icon: '👣', color: theme.colors.footsteps },
-    'speech': { icon: '🗣️', color: theme.colors.speech },
-    'music': { icon: '🎵', color: theme.colors.music },
-    'machinery': { icon: '⚙️', color: theme.colors.machinery },
-    'nature': { icon: '🌿', color: theme.colors.nature },
-    'silence': { icon: '🔇', color: theme.colors.silence },
+  useEffect(() => {
+    const startAnimation = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animatedValue, {
+            toValue: 1,
+            duration: 3000 + Math.random() * 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animatedValue, {
+            toValue: 0,
+            duration: 3000 + Math.random() * 2000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(translateY, {
+            toValue: -50,
+            duration: 4000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(translateY, {
+            toValue: 50,
+            duration: 4000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(opacity, {
+            toValue: 0.6,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacity, {
+            toValue: 0.2,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    };
+
+    setTimeout(startAnimation, delay);
+  }, []);
+
+  const scale = animatedValue.interpolate({
+    inputRange: [0, 0.5, 1],
+    outputRange: [0.5, 1.2, 0.8],
+  });
+
+  return (
+    <Animated.View
+      style={[
+        styles.particle,
+        {
+          backgroundColor: theme.colors.primary,
+          transform: [
+            { scale },
+            { translateY },
+          ],
+          opacity,
+        },
+      ]}
+    />
+  );
+};
+
+const FeatureCard = ({ 
+  icon, 
+  label, 
+  desc, 
+  onPress, 
+  theme, 
+  gradient = false,
+  delay = 0 
+}: any) => {
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    setTimeout(() => {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, delay);
+  }, []);
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    onPress();
   };
 
-  useEffect(() => {
-    // Auto-start detection if enabled in settings
-    if (settings.autoDetection) {
-      setIsRecording(true);
-    }
-  }, [settings.autoDetection]);
+  return (
+    <AnimatedTouchableOpacity
+      style={[
+        styles.featureCard,
+        {
+          transform: [{ scale: scaleAnim }],
+          opacity: opacityAnim,
+        },
+      ]}
+      onPress={handlePress}
+      activeOpacity={0.9}
+    >
+      {gradient ? (
+        <LinearGradient
+          colors={theme.gradients.card}
+          style={styles.featureCardGradient}
+        >
+          <FeatureCardContent icon={icon} label={label} desc={desc} theme={theme} />
+        </LinearGradient>
+      ) : (
+        <View style={[styles.featureCardContent, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
+          <FeatureCardContent icon={icon} label={label} desc={desc} theme={theme} />
+        </View>
+      )}
+    </AnimatedTouchableOpacity>
+  );
+};
+
+const FeatureCardContent = ({ icon, label, desc, theme }: any) => (
+  <>
+    <View style={[styles.featureIconContainer, { backgroundColor: theme.colors.primary + '20' }]}>
+      {icon}
+    </View>
+    <Text style={[styles.featureCardLabel, { color: theme.colors.text }]}>{label}</Text>
+    <Text style={[styles.featureCardDesc, { color: theme.colors.textSecondary }]}>{desc}</Text>
+  </>
+);
+
+const StatCard = ({ icon, value, label, color, delay = 0 }: any) => {
+  const { theme } = useTheme();
+  const animatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (isRecording) {
-      startPulseAnimation();
-      startWaveAnimation();
-      simulateAudioLevel();
-    } else {
-      stopAnimations();
-    }
-  }, [isRecording]);
+    setTimeout(() => {
+      Animated.timing(animatedValue, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }).start();
+    }, delay);
+  }, []);
 
-  const startPulseAnimation = () => {
+  const translateY = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [30, 0],
+  });
+
+  return (
+    <Animated.View
+      style={[
+        styles.statCard,
+        {
+          backgroundColor: theme.colors.card,
+          borderColor: theme.colors.border,
+          transform: [{ translateY }],
+          opacity: animatedValue,
+        },
+      ]}
+    >
+      <View style={[styles.statIcon, { backgroundColor: color + '20' }]}>
+        {React.cloneElement(icon, { size: 20, color })}
+      </View>
+      <Text style={[styles.statValue, { color: theme.colors.text }]}>{value}</Text>
+      <Text style={[styles.statLabel, { color: theme.colors.textSecondary }]}>{label}</Text>
+    </Animated.View>
+  );
+};
+
+export default function DashboardScreen() {
+  const { theme, isDark } = useTheme();
+  const router = useRouter();
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const waveAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Pulse animation for the main action button
     Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
-          toValue: 1.2,
-          duration: 1000,
+          toValue: 1.05,
+          duration: 2000,
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
-          duration: 1000,
+          duration: 2000,
           useNativeDriver: true,
         }),
       ])
     ).start();
-  };
 
-  const startWaveAnimation = () => {
+    // Wave animation
     Animated.loop(
       Animated.timing(waveAnim, {
         toValue: 1,
-        duration: 2000,
+        duration: 3000,
         useNativeDriver: true,
       })
     ).start();
-  };
+  }, []);
 
-  const stopAnimations = () => {
-    pulseAnim.stopAnimation();
-    waveAnim.stopAnimation();
-    confidenceAnim.stopAnimation();
-  };
+  const features = [
+    {
+      icon: <Mic size={28} color={theme.colors.primary} />,
+      label: 'Live Detection',
+      desc: 'Real-time audio classification',
+      path: '/(tabs)/detection',
+      gradient: true,
+    },
+    {
+      icon: <BarChart3 size={28} color={theme.colors.success} />,
+      label: 'Analytics',
+      desc: 'Event history and insights',
+      path: '/(tabs)/events',
+    },
+    {
+      icon: <Brain size={28} color={theme.colors.accent} />,
+      label: 'AI Learning',
+      desc: 'Federated learning system',
+      path: '/(tabs)/learning',
+    },
+    {
+      icon: <SettingsIcon size={28} color={theme.colors.info} />,
+      label: 'Settings',
+      desc: 'Customize your experience',
+      path: '/(tabs)/settings',
+    },
+  ];
 
-  const simulateAudioLevel = () => {
-    const interval = setInterval(() => {
-      if (!isRecording) {
-        clearInterval(interval);
-        return;
-      }
-      setAudioLevel(20 + Math.random() * 60);
-    }, 100);
-  };
-
-  const handlePyTorchPrediction = (prediction: any) => {
-    // Apply confidence threshold from settings
-    if (prediction.confidence < settings.confidenceThreshold) {
-      return;
-    }
-
-    const eventMapping = eventTypeMapping[prediction.event_type as keyof typeof eventTypeMapping];
-    
-    if (eventMapping) {
-      const event: DetectedEvent = {
-        type: prediction.event_type,
-        confidence: prediction.confidence,
-        timestamp: new Date(),
-        icon: eventMapping.icon,
-        category: prediction.category,
-        processing_time_ms: prediction.processing_time_ms,
-      };
-
-      setCurrentEvent(event);
-      
-      if (settings.saveDetections) {
-        setRecentEvents(prev => [event, ...prev.slice(0, 4)]);
-      }
-      
-      // Add to analytics
-      addEvent(event);
-      
-      Animated.timing(confidenceAnim, {
-        toValue: prediction.confidence,
-        duration: 500,
-        useNativeDriver: false,
-      }).start();
-
-      // Haptic feedback if enabled and not on web
-      if (settings.hapticFeedback && Platform.OS !== 'web') {
-        // Note: Haptics would be implemented here for native platforms
-      }
-
-      setTimeout(() => {
-        setCurrentEvent(null);
-        confidenceAnim.setValue(0);
-      }, 4000);
-    }
-  };
-
-  const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    setCurrentEvent(null);
-    setAudioLevel(0);
-    
-    if (!isRecording && !settings.saveDetections) {
-      setRecentEvents([]);
-    }
-  };
-
-  const getWaveTransform = () => {
-    const translateY = waveAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, -20],
-    });
-    return { transform: [{ translateY }] };
-  };
-
-  const getEventColor = (eventType: string) => {
-    const mapping = eventTypeMapping[eventType as keyof typeof eventTypeMapping];
-    return mapping?.color || theme.colors.textSecondary;
-  };
+  const stats = [
+    { icon: <Activity />, value: '94.2%', label: 'Accuracy', color: theme.colors.success },
+    { icon: <Zap />, value: '8ms', label: 'Latency', color: theme.colors.primary },
+    { icon: <Shield />, value: '100%', label: 'Private', color: theme.colors.accent },
+    { icon: <Globe />, value: '12', label: 'Events', color: theme.colors.info },
+  ];
 
   const renderContent = () => (
-    <ScrollView contentContainerStyle={styles.content}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: theme.colors.primary }]}>Live Detection</Text>
-        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
-          Real-time PyTorch • Privacy First • Edge Computing
-        </Text>
-      </View>
-
-      {/* Live Detection Status */}
-      <View style={[styles.statusCard, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}>
-        <View style={styles.statusIndicator}>
-          <View style={[styles.statusDot, { backgroundColor: isRecording ? theme.colors.success : theme.colors.error }]} />
-          <Text style={[styles.statusText, { color: theme.colors.text }]}>
-            {isRecording ? 'Listening for events...' : 'Detection Paused'}
-          </Text>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Hero Section */}
+      <LinearGradient
+        colors={theme.gradients.hero}
+        style={styles.heroSection}
+      >
+        {/* Floating Particles */}
+        <View style={styles.particleContainer}>
+          <FloatingParticle delay={0} />
+          <FloatingParticle delay={1000} />
+          <FloatingParticle delay={2000} />
         </View>
-        <TouchableOpacity
-          style={[styles.toggleButton, { backgroundColor: isRecording ? theme.colors.error : theme.colors.primary }]}
-          onPress={toggleRecording}
-        >
-          {isRecording ? <MicOff size={18} color="white" /> : <Mic size={18} color="white" />}
-          <Text style={styles.toggleButtonText}>{isRecording ? 'Stop' : 'Start'} Listening</Text>
-        </TouchableOpacity>
-      </View>
 
-      {/* Animated Waveform Placeholder */}
-      <View style={styles.waveformContainer}>
-        <Animated.View style={[
-          styles.waveform,
-          {
-            backgroundColor: isDark ? 'rgba(0,255,208,0.18)' : 'rgba(0, 119, 182, 0.1)',
-            borderColor: isDark ? '#00ffd0' : theme.colors.primary,
-            shadowColor: isDark ? '#00ffd0' : theme.colors.primary,
-            opacity: isRecording ? 1 : 0.5,
-            transform: [{ scaleY: 1 + audioLevel / 100 }],
-          }
-        ]} />
-        <Text style={[styles.waveformLabel, { color: isDark ? '#00ffd0' : theme.colors.primary }]}>Audio Waveform</Text>
-      </View>
-
-      {/* Current Detected Event */}
-      {currentEvent && (
-        <View style={[
-          styles.currentEventContainer,
-          {
-            borderColor: theme.colors.accent,
-            backgroundColor: isDark ? 'rgba(162,89,255,0.13)' : theme.colors.accent + '20',
-            shadowColor: theme.colors.accent,
-          }
-        ]}>
-          <Text style={[styles.currentEventTitle, { color: theme.colors.accent }]}>Detected Event</Text>
-          <View style={styles.currentEventRow}>
-            <Text style={styles.currentEventIcon}>{currentEvent.icon}</Text>
-            <Text style={[styles.currentEventType, { color: getEventColor(currentEvent.type) }]}>{currentEvent.type.replace('_', ' ').toUpperCase()}</Text>
-            <View style={[styles.confidenceBadge, { backgroundColor: theme.colors.primary + '22' }]}>
-              <Text style={[styles.confidenceText, { color: theme.colors.primary }]}>{Math.round(currentEvent.confidence * 100)}%</Text>
+        <View style={styles.heroContent}>
+          <Animated.View style={[styles.heroIcon, { transform: [{ scale: pulseAnim }] }]}>
+            <Waves size={40} color="white" />
+          </Animated.View>
+          
+          <Text style={styles.heroTitle}>AudioSense</Text>
+          <Text style={styles.heroSubtitle}>
+            Privacy-First AI Audio Detection
+          </Text>
+          
+          <View style={styles.heroFeatures}>
+            <View style={styles.heroFeature}>
+              <Shield size={16} color="rgba(255, 255, 255, 0.8)" />
+              <Text style={styles.heroFeatureText}>100% Local Processing</Text>
+            </View>
+            <View style={styles.heroFeature}>
+              <Zap size={16} color="rgba(255, 255, 255, 0.8)" />
+              <Text style={styles.heroFeatureText}>Real-time Detection</Text>
             </View>
           </View>
-          {currentEvent.processing_time_ms && (
-            <Text style={[styles.processingTime, { color: theme.colors.textSecondary }]}>Processing: {currentEvent.processing_time_ms.toFixed(1)} ms</Text>
-          )}
-        </View>
-      )}
 
-      {/* Recent Events Feed */}
-      <View
-        style={[styles.recentEventsContainer, {
-          backgroundColor: theme.colors.card,
-          borderColor: theme.colors.border,
-          shadowColor: theme.colors.primary,
-        }]}
-      >
-        <Text style={[styles.recentEventsTitle, { color: theme.colors.primary }]}>Recent Events</Text>
-        {recentEvents.length === 0 ? (
-          <Text style={[styles.emptyFeedText, { color: theme.colors.textSecondary }]}>No events detected yet.</Text>
-        ) : (
-          recentEvents.map((event, idx) => (
-            <View key={idx} style={[styles.recentEventItem, { borderBottomColor: theme.colors.border }]}>
-              <Text style={styles.recentEventIcon}>{event.icon}</Text>
-              <Text style={[styles.recentEventType, { color: getEventColor(event.type) }]}>{event.type.replace('_', ' ').toUpperCase()}</Text>
-              <Text style={[styles.recentEventConfidence, { color: theme.colors.success }]}>{Math.round(event.confidence * 100)}%</Text>
-              <Text style={[styles.recentEventTime, { color: theme.colors.textSecondary }]}>{formatTimeAgo(event.timestamp)}</Text>
-            </View>
-          ))
-        )}
+          <TouchableOpacity
+            style={styles.mainAction}
+            onPress={() => router.push('/(tabs)/detection')}
+            activeOpacity={0.8}
+          >
+            <LinearGradient
+              colors={['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)']}
+              style={styles.mainActionGradient}
+            >
+              <Play size={24} color="white" />
+              <Text style={styles.mainActionText}>Start Detection</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+
+      {/* Stats Section */}
+      <View style={styles.statsSection}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+          Performance Metrics
+        </Text>
+        <View style={styles.statsGrid}>
+          {stats.map((stat, index) => (
+            <StatCard
+              key={stat.label}
+              icon={stat.icon}
+              value={stat.value}
+              label={stat.label}
+              color={stat.color}
+              delay={index * 200}
+            />
+          ))}
+        </View>
       </View>
+
+      {/* Features Section */}
+      <View style={styles.featuresSection}>
+        <View style={styles.sectionHeader}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Explore Features
+          </Text>
+          <Sparkles size={24} color={theme.colors.primary} />
+        </View>
+        
+        <View style={styles.featureGrid}>
+          {features.map((feature, index) => (
+            <FeatureCard
+              key={feature.label}
+              icon={feature.icon}
+              label={feature.label}
+              desc={feature.desc}
+              onPress={() => router.push(feature.path as any)}
+              theme={theme}
+              gradient={feature.gradient}
+              delay={index * 150}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Technology Section */}
+      <LinearGradient
+        colors={theme.gradients.card}
+        style={styles.techSection}
+      >
+        <View style={styles.techHeader}>
+          <Brain size={28} color={theme.colors.primary} />
+          <Text style={[styles.techTitle, { color: theme.colors.text }]}>
+            Powered by AI
+          </Text>
+        </View>
+        
+        <Text style={[styles.techDescription, { color: theme.colors.textSecondary }]}>
+          Advanced neural networks trained on the DCASE dataset, optimized for mobile deployment 
+          with PyTorch Mobile. Experience cutting-edge audio AI that respects your privacy.
+        </Text>
+
+        <View style={styles.techFeatures}>
+          <View style={styles.techFeature}>
+            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.success + '20' }]}>
+              <Shield size={16} color={theme.colors.success} />
+            </View>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
+              Edge Computing
+            </Text>
+          </View>
+          
+          <View style={styles.techFeature}>
+            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.primary + '20' }]}>
+              <Brain size={16} color={theme.colors.primary} />
+            </View>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
+              Neural Networks
+            </Text>
+          </View>
+          
+          <View style={styles.techFeature}>
+            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.accent + '20' }]}>
+              <Users size={16} color={theme.colors.accent} />
+            </View>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
+              Federated Learning
+            </Text>
+          </View>
+        </View>
+      </LinearGradient>
     </ScrollView>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: isDark ? '#0f1123' : theme.colors.background }]}>
-      {isDark ? (
-        <LinearGradient colors={theme.gradients.background} style={styles.container}>
-          {renderContent()}
-        </LinearGradient>
-      ) : (
-        renderContent()
-      )}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+      {renderContent()}
     </SafeAreaView>
   );
 }
 
-function formatTimeAgo(date: Date) {
-  const now = new Date();
-  const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (diff < 60) return `${diff}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  return date.toLocaleDateString();
-}
-
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },
-  content: {
-    padding: 24,
+  contentContainer: {
+    paddingBottom: 32,
   },
-  header: {
+  heroSection: {
+    minHeight: height * 0.6,
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+    justifyContent: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  particleContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  particle: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    top: '20%',
+    left: '10%',
+  },
+  heroContent: {
     alignItems: 'center',
+    zIndex: 1,
+  },
+  heroIcon: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 24,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  title: {
-    fontSize: 28,
+  heroTitle: {
+    fontSize: 42,
     fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 16,
-    marginTop: 8,
+    color: 'white',
+    marginBottom: 12,
     textAlign: 'center',
   },
-  statusCard: {
-    padding: 16,
+  heroSubtitle: {
+    fontSize: 18,
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  heroFeatures: {
+    flexDirection: 'row',
+    gap: 24,
+    marginBottom: 40,
+  },
+  heroFeature: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  heroFeatureText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  mainAction: {
+    borderRadius: 25,
+    overflow: 'hidden',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  mainActionGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 18,
+    paddingHorizontal: 32,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  mainActionText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  statsSection: {
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: (width - 60) / 2,
+    padding: 20,
     borderRadius: 16,
     borderWidth: 1,
     alignItems: 'center',
-    marginBottom: 24,
   },
-  statusIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  statusText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  toggleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  toggleButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  waveformContainer: {
-    marginTop: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 80,
-  },
-  waveform: {
-    width: width * 0.7,
+  statIcon: {
+    width: 40,
     height: 40,
     borderRadius: 20,
-    marginBottom: 8,
-    shadowOpacity: 0.85,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 6 },
-    borderWidth: 2,
-  },
-  waveformLabel: {
-    fontSize: 13,
-    fontStyle: 'italic',
-  },
-  currentEventContainer: {
-    marginTop: 24,
-    padding: 24,
-    borderRadius: 28,
-    borderWidth: 2.5,
-    shadowOpacity: 0.7,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
     alignItems: 'center',
-    marginBottom: 24,
-    elevation: 8,
-  },
-  currentEventTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  currentEventRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  currentEventIcon: {
-    fontSize: 32,
-    marginRight: 10,
-  },
-  currentEventType: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 10,
-  },
-  confidenceBadge: {
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    marginLeft: 4,
-  },
-  confidenceText: {
-    color: '#aeefff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  processingTime: {
-    color: '#aeefff',
-    fontSize: 15,
-  },
-  recentEventsContainer: {
-    borderRadius: 28,
-    borderWidth: 2.5,
-    shadowOpacity: 0.18,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 10 },
-    padding: 28,
-    marginBottom: 28,
-    elevation: 12,
-  },
-  recentEventsTitle: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    marginBottom: 10,
-  },
-  recentEventItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 12,
   },
-  recentEventIcon: {
+  statValue: {
     fontSize: 24,
-    marginRight: 10,
-  },
-  recentEventType: {
     fontWeight: 'bold',
-    fontSize: 16,
-    marginRight: 10,
+    marginBottom: 4,
   },
-  recentEventConfidence: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginRight: 10,
-  },
-  recentEventTime: {
-    fontSize: 14,
-  },
-  emptyFeedText: {
-    fontSize: 16,
-    fontWeight: '600',
+  statLabel: {
+    fontSize: 12,
     textAlign: 'center',
-    marginTop: 20,
+  },
+  featuresSection: {
+    paddingHorizontal: 24,
+    paddingBottom: 32,
+  },
+  featureGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  featureCard: {
+    flex: 1,
+    minWidth: (width - 64) / 2,
+  },
+  featureCardGradient: {
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    minHeight: 160,
+    justifyContent: 'center',
+  },
+  featureCardContent: {
+    borderRadius: 20,
+    padding: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    minHeight: 160,
+    justifyContent: 'center',
+  },
+  featureIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  featureCardLabel: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  featureCardDesc: {
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  techSection: {
+    marginHorizontal: 24,
+    borderRadius: 24,
+    padding: 28,
+    marginBottom: 32,
+  },
+  techHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
+  },
+  techTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  techDescription: {
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  techFeatures: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  techFeature: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  techFeatureIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  techFeatureText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
