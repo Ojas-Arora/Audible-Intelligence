@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Audio } from 'expo-av';
 import {
   View,
   Text,
@@ -257,63 +258,57 @@ export default function DetectionScreen() {
   };
 
   const startDetection = () => {
-    detectionInterval.current = setInterval(() => {
-      // Simulate random detection
-      if (Math.random() > 0.7) {
-        const eventTypes = Object.keys(eventTypeMapping);
-        const randomType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-        const confidence = settings.confidenceThreshold + Math.random() * (1 - settings.confidenceThreshold);
-        
-        if (confidence >= settings.confidenceThreshold) {
-          const eventMapping = eventTypeMapping[randomType as keyof typeof eventTypeMapping];
-          
-          const event: DetectedEvent = {
-            type: randomType,
-            confidence,
-            timestamp: new Date(),
-            icon: eventMapping.icon,
-            category: getCategoryForEvent(randomType),
-            processing_time_ms: 8 + Math.random() * 6,
-          };
+  if (detectionInterval.current) return;
+  detectionInterval.current = setInterval(async () => {
+    try {
+      const startTime = Date.now();
+      const response = await fetch('http://192.168.29.32:5001/predict-from-path', {
+        method: 'POST',
+      });
+      const result = await response.json();
+      const endTime = Date.now();
 
-          setCurrentEvent(event);
-          
-          if (settings.saveDetections) {
-            setRecentEvents(prev => [event, ...prev.slice(0, 4)]);
-          }
-          
-          addEvent(event);
-          
-          // CRITICAL: Show notification ONLY if notifications are enabled in settings
-          // This is the main fix - directly checking settings.notifications
-          if (settings.notifications === true) {
-            console.log('✅ Notifications ENABLED - showing notification for:', event.type);
-            showNotification(event);
-          } else {
-            console.log('❌ Notifications DISABLED - NOT showing notification for:', event.type);
-          }
-          
-          // Update stats
-          setDetectionStats(prev => ({
-            totalEvents: prev.totalEvents + 1,
-            avgConfidence: (prev.avgConfidence * prev.totalEvents + confidence) / (prev.totalEvents + 1),
-            uptime: prev.uptime,
-          }));
-
-          setTimeout(() => {
-            setCurrentEvent(null);
-          }, 4000);
+      if (result.predicted_class) {
+        const detectedType = result.predicted_class;
+        const confidence = result.confidence || 0.99;
+        const eventMapping = (eventTypeMapping as any)[detectedType] || { icon: '🎵', color: theme.colors.primary };
+        const event: DetectedEvent = {
+          type: detectedType,
+          confidence,
+          timestamp: new Date(),
+          icon: eventMapping.icon,
+          category: getCategoryForEvent(detectedType),
+          processing_time_ms: endTime - startTime,
+        };
+        setCurrentEvent(event);
+        if (settings.saveDetections) {
+          setRecentEvents(prev => [event, ...prev.slice(0, 4)]);
         }
+        addEvent(event);
+        showNotification(event);
+        setDetectionStats(prev => ({
+          totalEvents: prev.totalEvents + 1,
+          avgConfidence: (prev.avgConfidence * prev.totalEvents + confidence) / (prev.totalEvents + 1),
+          uptime: prev.uptime,
+        }));
+        setTimeout(() => {
+          setCurrentEvent(null);
+        }, 4000);
+      } else {
+        Alert.alert('Prediction failed', result.error || 'Unknown error');
       }
-    }, 2000 + Math.random() * 3000);
-  };
-
-  const stopDetection = () => {
-    if (detectionInterval.current) {
-      clearInterval(detectionInterval.current);
-      detectionInterval.current = null;
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Unknown error');
     }
-  };
+  }, 3000) as unknown as NodeJS.Timeout;
+};
+
+const stopDetection = () => {
+  if (detectionInterval.current) {
+    clearInterval(detectionInterval.current);
+    detectionInterval.current = null;
+  }
+};
 
   const showNotification = (event: DetectedEvent) => {
     // Final safety check - this should never be called if notifications are disabled
