@@ -400,13 +400,12 @@ export default function DashboardScreen() {
         <View style={styles.techHeader}>
           <Brain size={28} color={theme.colors.primary} />
           <Text style={[styles.techTitle, { color: theme.colors.text }]}>
-            Powered by AI
+            Tech & Features
           </Text>
         </View>
         
         <Text style={[styles.techDescription, { color: theme.colors.textSecondary }]}>
-          Advanced neural networks trained on the DCASE dataset, optimized for mobile deployment 
-          with PyTorch Mobile. Experience cutting-edge audio AI that respects your privacy.
+          This dashboard is built with React Native (Expo), expo-av for audio, Animated API for smooth UI, and lucide-react-native icons. All audio processing is local (privacy-first). Includes event detection, analytics and customizable settings – all implemented with real code.
         </Text>
 
         <View style={styles.techFeatures}>
@@ -415,7 +414,7 @@ export default function DashboardScreen() {
               <Shield size={16} color={theme.colors.success} />
             </View>
             <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
-              Edge Computing
+              Edge AI and Accessibility
             </Text>
           </View>
           
@@ -424,7 +423,7 @@ export default function DashboardScreen() {
               <Brain size={16} color={theme.colors.primary} />
             </View>
             <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
-              Neural Networks
+            Acoustic Detection
             </Text>
           </View>
           
@@ -433,7 +432,7 @@ export default function DashboardScreen() {
               <Users size={16} color={theme.colors.accent} />
             </View>
             <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
-              Federated Learning
+            Smart Environments
             </Text>
           </View>
         </View>
