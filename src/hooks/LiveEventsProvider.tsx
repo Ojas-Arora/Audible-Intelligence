@@ -12,6 +12,7 @@ export interface LiveStats {
   avgConfidence: number;
   detectionAccuracy: number;
   topEvents: Array<{ type: string; count: number }>;
+  avgLatency?: number;
 }
 
 const EVENT_TYPES = [
@@ -34,6 +35,19 @@ const LiveEventsContext = createContext<LiveEventsContextType | undefined>(undef
 export const LiveEventsProvider = ({ children }: { children: ReactNode }) => {
   const [events, setEvents] = useState<LiveEvent[]>([]);
 
+  // Calculate average latency between last N events
+  let avgLatency: number | undefined = undefined;
+  if (events.length > 1) {
+    // Sort by timestamp descending (most recent first)
+    const sorted = [...events].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const N = Math.min(10, sorted.length - 1);
+    let totalDiff = 0;
+    for (let i = 0; i < N; i++) {
+      totalDiff += Math.abs(sorted[i].timestamp.getTime() - sorted[i + 1].timestamp.getTime());
+    }
+    avgLatency = totalDiff / N;
+  }
+
   const stats: LiveStats = {
     totalEvents: events.length,
     avgConfidence: events.length ? events.reduce((a, b) => a + b.confidence, 0) / events.length : 0,
@@ -42,6 +56,7 @@ export const LiveEventsProvider = ({ children }: { children: ReactNode }) => {
       type: e.type,
       count: events.filter(ev => ev.type === e.type).length,
     })).sort((a, b) => b.count - a.count).slice(0, 4),
+    avgLatency,
   };
 
   const getLastDetectedTimes = () => {

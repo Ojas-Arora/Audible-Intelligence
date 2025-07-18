@@ -288,7 +288,7 @@ export default function DashboardScreen() {
 
   const stats = [
     { icon: <Activity />, value: `${(liveStats.detectionAccuracy ?? liveStats.avgConfidence ?? 0) * 100 > 0 ? ((liveStats.detectionAccuracy ?? liveStats.avgConfidence) * 100).toFixed(1) : '0.0'}%`, label: 'Accuracy', color: theme.colors.success },
-    { icon: <Zap />, value: 'N/A', label: 'Latency', color: theme.colors.primary },
+    { icon: <Zap />, value: typeof liveStats.avgLatency === 'number' && liveStats.avgLatency > 0 ? `${liveStats.avgLatency.toFixed(1)}ms` : 'N/A', label: 'Latency', color: theme.colors.primary },
     { icon: <Shield />, value: '100%', label: 'Private', color: theme.colors.accent },
     { icon: <Globe />, value: `${liveStats.totalEvents ?? 0}`, label: 'Events', color: theme.colors.info },
   ];

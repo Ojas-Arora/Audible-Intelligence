@@ -290,10 +290,10 @@ export default function EventsScreen() {
           />
           <StatCard
             icon={<Zap />}
-            value={`8ms`}
+            value={typeof stats.avgLatency === 'number' && stats.avgLatency > 0 ? `${stats.avgLatency.toFixed(1)}ms` : 'N/A'}
             label="Avg Latency"
             color="#F7B731"
-            change="-2ms"
+            change={stats.avgLatency ? '' : undefined}
           />
           <StatCard
             icon={<Volume2 />}
