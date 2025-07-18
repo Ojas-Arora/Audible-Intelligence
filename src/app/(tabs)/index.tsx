@@ -222,7 +222,10 @@ const StatCard = ({ icon, value, label, color, delay = 0 }: any) => {
   );
 };
 
+import { useLiveEvents } from '@/hooks/useLiveEvents';
+
 export default function DashboardScreen() {
+  const { stats: liveStats } = useLiveEvents();
   const { theme, isDark } = useTheme();
   const router = useRouter();
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -284,10 +287,10 @@ export default function DashboardScreen() {
   ];
 
   const stats = [
-    { icon: <Activity />, value: '94.2%', label: 'Accuracy', color: theme.colors.success },
-    { icon: <Zap />, value: '8ms', label: 'Latency', color: theme.colors.primary },
+    { icon: <Activity />, value: `${(liveStats.detectionAccuracy ?? liveStats.avgConfidence ?? 0) * 100 > 0 ? ((liveStats.detectionAccuracy ?? liveStats.avgConfidence) * 100).toFixed(1) : '0.0'}%`, label: 'Accuracy', color: theme.colors.success },
+    { icon: <Zap />, value: 'N/A', label: 'Latency', color: theme.colors.primary },
     { icon: <Shield />, value: '100%', label: 'Private', color: theme.colors.accent },
-    { icon: <Globe />, value: '12', label: 'Events', color: theme.colors.info },
+    { icon: <Globe />, value: `${liveStats.totalEvents ?? 0}`, label: 'Events', color: theme.colors.info },
   ];
 
   const renderContent = () => (

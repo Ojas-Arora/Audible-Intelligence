@@ -30,6 +30,17 @@ interface Event {
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
+// Emoji icons for event types
+import { Plane } from 'lucide-react-native';
+
+const EVENT_TYPE_ICONS: Record<string, React.ReactNode> = {
+  airport: <Plane size={24} color="#7B61FF" />,
+  bus: <Text style={{fontSize: 24}}>🚌</Text>,
+  metro: <Text style={{fontSize: 24}}>🚇</Text>,
+  park: <Text style={{fontSize: 24}}>🌳</Text>,
+  shopping_mall: <Text style={{fontSize: 24}}>🏬</Text>,
+};
+
 const EventCard = ({ event, theme, index }: { event: any; theme: any; index: number }) => {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -90,7 +101,7 @@ const EventCard = ({ event, theme, index }: { event: any; theme: any; index: num
       >
         <View style={styles.eventCardHeader}>
           <View style={styles.eventIconContainer}>
-            <Text style={styles.eventIcon}>{event.icon}</Text>
+            {EVENT_TYPE_ICONS[event.type] || <Text style={styles.eventIcon}>❓</Text>}
           </View>
           <View style={styles.eventInfo}>
             <Text style={[styles.eventType, { color: theme.colors.text }]}>
@@ -192,58 +203,22 @@ const StatCard = ({ icon, value, label, color, change, delay = 0 }: any) => {
 };
 
 export default function EventsScreen() {
-  const { events } = useLiveEvents();
+  const { events, stats, getLastDetectedTimes } = useLiveEvents();
   const { theme, isDark } = useTheme();
-  const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimeRange, setSelectedTimeRange] = useState('today');
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState('all');
 
-  // Generate some sample events for demonstration
-  const [sampleEvents] = useState(() => {
-    const eventTypes = [
-      { type: 'dog_bark', icon: '🐕' },
-      { type: 'car_horn', icon: '🚗' },
-      { type: 'alarm', icon: '🚨' },
-      { type: 'glass_break', icon: '🥃' },
-      { type: 'door_slam', icon: '🚪' },
-      { type: 'footsteps', icon: '👣' },
-      { type: 'speech', icon: '🗣️' },
-      { type: 'music', icon: '🎵' },
-    ];
-
-    return Array.from({ length: 20 }, (_, i) => {
-      const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-      return {
-        id: `event-${i}`,
-        type: eventType.type,
-        icon: eventType.icon,
-        confidence: 0.6 + Math.random() * 0.4,
-        timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
-        duration: Math.random() * 5000 + 1000,
-      };
-    });
-  });
-
-  const allEvents = [...events, ...sampleEvents].sort((a, b) => 
-    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  );
-
-  const filterTypes = ['all', 'animals', 'vehicles', 'alarms', 'home'];
+  // Only use the 5 real event types
+  const EVENT_TYPES = ['airport', 'bus', 'metro', 'park', 'shopping_mall'];
   const timeRanges = ['today', 'week', 'month', 'all'];
 
-  const filteredEvents = allEvents.filter(event => {
-    const matchesFilter = filter === 'all' || 
-      (filter === 'animals' && ['dog_bark'].includes(event.type)) ||
-      (filter === 'vehicles' && ['car_horn'].includes(event.type)) ||
-      (filter === 'alarms' && ['alarm', 'glass_break'].includes(event.type)) ||
-      (filter === 'home' && ['door_slam', 'footsteps', 'speech', 'music'].includes(event.type));
-    
+  // Filtering logic for search and time range
+  const filteredEvents = events.filter(event => {
     const matchesSearch = event.type.toLowerCase().includes(searchQuery.toLowerCase());
-    
     const now = new Date();
     const eventDate = new Date(event.timestamp);
     let matchesTimeRange = true;
-    
     if (selectedTimeRange === 'today') {
       matchesTimeRange = eventDate.toDateString() === now.toDateString();
     } else if (selectedTimeRange === 'week') {
@@ -253,40 +228,25 @@ export default function EventsScreen() {
       const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
       matchesTimeRange = eventDate >= monthAgo;
     }
-    
-    return matchesFilter && matchesSearch && matchesTimeRange;
+    const matchesType = selectedTypeFilter === 'all' ? true : event.type === selectedTypeFilter;
+    return matchesSearch && matchesTimeRange && matchesType;
   });
 
-  const stats = [
-    { 
-      icon: <Activity />, 
-      value: filteredEvents.length.toString(), 
-      label: 'Total Events', 
-      color: theme.colors.primary,
-      change: '+12%'
-    },
-    { 
-      icon: <TrendingUp />, 
-      value: `${Math.round(filteredEvents.reduce((acc, e) => acc + e.confidence, 0) / filteredEvents.length * 100) || 0}%`, 
-      label: 'Avg Confidence', 
-      color: theme.colors.success,
-      change: '+5%'
-    },
-    { 
-      icon: <Zap />, 
-      value: '8ms', 
-      label: 'Avg Latency', 
-      color: theme.colors.accent,
-      change: '-2ms'
-    },
-    { 
-      icon: <Volume2 />, 
-      value: filteredEvents.filter(e => e.confidence > 0.8).length.toString(), 
-      label: 'High Confidence', 
-      color: theme.colors.info,
-      change: '+8%'
-    },
-  ];
+  // Stats per event type
+  const lastDetectedTimes = getLastDetectedTimes();
+   EVENT_TYPES.map(type => {
+    const count = events.filter(e => e.type === type).length;
+    const lastTime = lastDetectedTimes[type];
+    return {
+      type,
+      count,
+      lastDetected: lastTime ? new Date(lastTime) : null,
+    };
+  });
+
+  // No more legacy stats - show count and last detected for each event
+  // This replaces the old StatCard grid
+
 
   const renderContent = () => (
     <ScrollView 
@@ -312,74 +272,68 @@ export default function EventsScreen() {
 
       {/* Stats Section */}
       <View style={styles.statsSection}>
-        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-          Performance Overview
-        </Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Performance Overview</Text>
         <View style={styles.statsGrid}>
-          {stats.map((stat, index) => (
-            <StatCard
-              key={stat.label}
-              icon={stat.icon}
-              value={stat.value}
-              label={stat.label}
-              color={stat.color}
-              change={stat.change}
-              delay={index * 100}
-            />
-          ))}
+          <StatCard
+            icon={<Activity />}
+            value={stats.totalEvents}
+            label="Total Events"
+            color="#7B61FF"
+            change="+12%"
+          />
+          <StatCard
+            icon={<TrendingUp />}
+            value={`${Math.round(stats.avgConfidence * 100)}%`}
+            label="Avg Confidence"
+            color="#2ECC71"
+            change="+5%"
+          />
+          <StatCard
+            icon={<Zap />}
+            value={`8ms`}
+            label="Avg Latency"
+            color="#F7B731"
+            change="-2ms"
+          />
+          <StatCard
+            icon={<Volume2 />}
+            value={events.filter(e => e.confidence >= 0.9).length}
+            label="High Confidence"
+            color="#5C7CFA"
+            change="+8%"
+          />
         </View>
       </View>
 
-      {/* Filters Section */}
+      {/* Event Type Filters */}
       <View style={styles.filtersSection}>
-        <View style={styles.searchContainer}>
-          <View style={[styles.searchBar, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-            <Search size={20} color={theme.colors.textSecondary} />
-            <TextInput
-              style={[styles.searchInput, { color: theme.colors.text }]}
-              placeholder="Search events..."
-              placeholderTextColor={theme.colors.textSecondary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-        </View>
-
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContent}
-        >
-          {filterTypes.map((type) => (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContent}>
+          {[
+            { label: 'All', value: 'all' },
+            { label: 'Airport', value: 'airport' },
+            { label: 'Bus', value: 'bus' },
+            { label: 'Metro', value: 'metro' },
+            { label: 'Park', value: 'park' },
+            { label: 'Shopping Mall', value: 'shopping_mall' },
+          ].map(filter => (
             <TouchableOpacity
-              key={type}
+              key={filter.value}
               style={[
                 styles.filterButton,
                 {
-                  backgroundColor: filter === type ? theme.colors.primary : theme.colors.surface,
-                  borderColor: filter === type ? theme.colors.primary : theme.colors.border,
+                  backgroundColor: (selectedTypeFilter === filter.value) ? theme.colors.accent : theme.colors.surface,
+                  borderColor: (selectedTypeFilter === filter.value) ? theme.colors.accent : theme.colors.border,
                 },
               ]}
-              onPress={() => setFilter(type)}
+              onPress={() => setSelectedTypeFilter(filter.value)}
             >
-              <Text
-                style={[
-                  styles.filterText,
-                  { color: filter === type ? 'white' : theme.colors.text },
-                ]}
-              >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-              </Text>
+              <Text style={[styles.filterText, { color: (selectedTypeFilter === filter.value) ? 'white' : theme.colors.text }]}>{filter.label}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
-
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterContent}
-        >
-          {timeRanges.map((range) => (
+        {/* Time Filters */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterContent}>
+          {timeRanges.map(range => (
             <TouchableOpacity
               key={range}
               style={[
@@ -405,32 +359,60 @@ export default function EventsScreen() {
         </ScrollView>
       </View>
 
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={[
+          styles.searchBar,
+          {
+            backgroundColor: theme.colors.surface,
+            borderWidth: 0,
+            borderColor: 'transparent',
+            shadowColor: 'transparent',
+            elevation: 0,
+          },
+        ]}>
+          <Search size={20} color={theme.colors.textSecondary} style={{ marginRight: 8 }} />
+          <TextInput
+            style={[
+              styles.searchInput,
+              {
+                color: theme.colors.text,
+                paddingVertical: 8,
+                borderWidth: 0,
+                borderColor: 'transparent',
+                outlineWidth: 0,
+                outlineColor: 'transparent',
+                shadowColor: 'transparent',
+                elevation: 0,
+              },
+            ]}
+            placeholder="Search events..."
+            placeholderTextColor={theme.colors.textSecondary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            underlineColorAndroid="transparent"
+            selectionColor={theme.colors.accent}
+          />
+        </View>
+      </View>
+
       {/* Events List */}
       <View style={styles.eventsSection}>
         <View style={styles.eventsSectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Recent Events
-          </Text>
-          <Text style={[styles.eventsCount, { color: theme.colors.textSecondary }]}>
-            {filteredEvents.length} events
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Recent Events</Text>
+          <Text style={[styles.eventsCount, { color: theme.colors.textSecondary }]}>{filteredEvents.length} events</Text>
         </View>
-
         {filteredEvents.length === 0 ? (
           <View style={styles.emptyContainer}>
             <AlertCircle size={48} color={theme.colors.textSecondary} />
-            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>
-              No events found
-            </Text>
-            <Text style={[styles.emptySubText, { color: theme.colors.textSecondary }]}>
-              Try adjusting your search or filter criteria
-            </Text>
+            <Text style={[styles.emptyText, { color: theme.colors.textSecondary }]}>No events found</Text>
+            <Text style={[styles.emptySubText, { color: theme.colors.textSecondary }]}>Try adjusting your search or filter criteria</Text>
           </View>
         ) : (
           <View style={styles.eventsList}>
             {filteredEvents.map((event, index) => (
               <EventCard
-                key={event.id || index}
+                key={index}
                 event={event}
                 theme={theme}
                 index={index}

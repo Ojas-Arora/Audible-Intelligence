@@ -24,9 +24,7 @@ interface DetectedEvent {
   type: string;
   confidence: number;
   timestamp: Date;
-  icon: string;
   category: string;
-  processing_time_ms?: number;
 }
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
@@ -129,7 +127,7 @@ const EventCard = ({ event, theme, delay = 0 }: any) => {
         style={styles.eventCardGradient}
       >
         <View style={styles.eventHeader}>
-          <Text style={styles.eventIcon}>{event.icon}</Text>
+
           <View style={styles.eventInfo}>
             <Text style={[styles.eventType, { color: theme.colors.text }]}>
               {event.type.replace('_', ' ').toUpperCase()}
@@ -144,12 +142,6 @@ const EventCard = ({ event, theme, delay = 0 }: any) => {
             </Text>
           </View>
         </View>
-        
-        {event.processing_time_ms && (
-          <Text style={[styles.processingTime, { color: theme.colors.textSecondary }]}>
-            Processed in {event.processing_time_ms.toFixed(1)}ms
-          </Text>
-        )}
       </LinearGradient>
     </Animated.View>
   );
@@ -271,15 +263,13 @@ export default function DetectionScreen() {
       if (result.predicted_class) {
         const detectedType = result.predicted_class;
         const confidence = result.confidence || 0.99;
-        const eventMapping = (eventTypeMapping as any)[detectedType] || { icon: '🎵', color: theme.colors.primary };
-        const event: DetectedEvent = {
+        const event = {
           type: detectedType,
           confidence,
           timestamp: new Date(),
-          icon: eventMapping.icon,
-          category: getCategoryForEvent(detectedType),
-          processing_time_ms: endTime - startTime,
+          category: getCategoryForEvent(detectedType)
         };
+
         setCurrentEvent(event);
         if (settings.saveDetections) {
           setRecentEvents(prev => [event, ...prev.slice(0, 4)]);
@@ -317,8 +307,8 @@ const stopDetection = () => {
       return;
     }
 
-    const title = `🎵 Audio Event Detected`;
-    const message = `${event.icon} ${event.type.replace('_', ' ').toUpperCase()} detected with ${Math.round(event.confidence * 100)}% confidence`;
+    const title = `Audio Event Detected`;
+    const message = `${event.type.replace('_', ' ').toUpperCase()} detected with ${Math.round(event.confidence * 100)}% confidence`;
     
     console.log('📢 SHOWING NOTIFICATION:', { 
       title, 
@@ -333,16 +323,12 @@ const stopDetection = () => {
         if (Notification.permission === 'granted') {
           new Notification(title, {
             body: message,
-            icon: '/favicon.png',
-            badge: '/favicon.png',
           });
         } else if (Notification.permission !== 'denied') {
           Notification.requestPermission().then(permission => {
             if (permission === 'granted') {
               new Notification(title, {
                 body: message,
-                icon: '/favicon.png',
-                badge: '/favicon.png',
               });
             }
           });

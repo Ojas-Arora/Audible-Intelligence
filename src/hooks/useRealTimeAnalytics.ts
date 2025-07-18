@@ -5,7 +5,7 @@ export interface AnalyticsData {
   avgConfidence: number;
   detectionAccuracy: number;
   uptime: string;
-  topEvents: Array<{ type: string; count: number; icon: string }>;
+  topEvents: Array<{ type: string; count: number }>;
   hourlyData: Array<{ hour: string; count: number }>;
   recentActivity: Array<{ timestamp: Date; event: string; confidence: number }>;
   systemHealth: {
@@ -59,12 +59,11 @@ export const useRealTimeAnalytics = () => {
     const newEvents = Math.floor(Math.random() * 3); // 0-2 new events
     
     const eventTypes = [
-      { type: 'Dog Bark', icon: '🐕' },
-      { type: 'Car Horn', icon: '🚗' },
-      { type: 'Alarm', icon: '🚨' },
-      { type: 'Door Slam', icon: '🚪' },
-      { type: 'Footsteps', icon: '👣' },
-      { type: 'Speech', icon: '🗣️' },
+      { type: 'airport' },
+      { type: 'bus' },
+      { type: 'metro' },
+      { type: 'park' },
+      { type: 'shopping_mall' },
     ];
 
     // Generate hourly data for the last 24 hours

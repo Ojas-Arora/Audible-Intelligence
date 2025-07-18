@@ -1,1 +1,1 @@
-../test_audio/bus/bus-barcelona-210-6387-0-s1.wav
+../test_audio/airport/airport-barcelona-203-6122-0-b.wav
