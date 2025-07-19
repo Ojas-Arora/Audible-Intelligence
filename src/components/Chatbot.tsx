@@ -74,6 +74,7 @@ const Chatbot = () => {
               </View>
             )}
             contentContainerStyle={{ padding: 12 }}
+            style={{ maxHeight: Platform.select({ web: 200, default: 450 }) }}
           />
           <View style={styles.faqList}>
             {FAQ.map((faq, i) => (
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 22,
-    bottom: 32,
+    bottom: 90,
     zIndex: 9999,
     width: 56,
     height: 56,
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
   chatWindow: {
     position: 'absolute',
     right: 14,
-    bottom: 90,
+    bottom: 150,
     width: 350,
     maxHeight: 600,
     borderRadius: 20,

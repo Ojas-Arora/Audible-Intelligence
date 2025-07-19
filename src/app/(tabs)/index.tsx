@@ -408,32 +408,24 @@ export default function DashboardScreen() {
           This dashboard is built with React Native (Expo), expo-av for audio, Animated API for smooth UI, and lucide-react-native icons. All audio processing is local (privacy-first). Includes event detection, analytics and customizable settings – all implemented with real code.
         </Text>
 
-        <View style={styles.techFeatures}>
+        <View style={[styles.techFeatures, { justifyContent: 'space-between' }]}> 
           <View style={styles.techFeature}>
-            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.success + '20' }]}>
+            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.success + '20' }]}> 
               <Shield size={16} color={theme.colors.success} />
             </View>
-            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
-              Edge AI and Accessibility
-            </Text>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>Edge AI</Text>
           </View>
-          
           <View style={styles.techFeature}>
-            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.primary + '20' }]}>
-              <Brain size={16} color={theme.colors.primary} />
+            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.primary + '20' }]}> 
+              <Waves size={16} color={theme.colors.primary} />
             </View>
-            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
-            Acoustic Detection
-            </Text>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>Acoustic</Text>
           </View>
-          
           <View style={styles.techFeature}>
-            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.accent + '20' }]}>
+            <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.accent + '20' }]}> 
               <Users size={16} color={theme.colors.accent} />
             </View>
-            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>
-            Smart Environments
-            </Text>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>Smart Env.</Text>
           </View>
         </View>
       </LinearGradient>
