@@ -413,19 +413,19 @@ export default function DashboardScreen() {
             <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.success + '20' }]}> 
               <Shield size={16} color={theme.colors.success} />
             </View>
-            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>Edge AI</Text>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text, fontSize: 11 }]}>Edge AI & Accessibility</Text>
           </View>
           <View style={styles.techFeature}>
             <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.primary + '20' }]}> 
               <Waves size={16} color={theme.colors.primary} />
             </View>
-            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>Acoustic</Text>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text, fontSize: 11 }]}>Acoustic Detection</Text>
           </View>
           <View style={styles.techFeature}>
             <View style={[styles.techFeatureIcon, { backgroundColor: theme.colors.accent + '20' }]}> 
               <Users size={16} color={theme.colors.accent} />
             </View>
-            <Text style={[styles.techFeatureText, { color: theme.colors.text }]}>Smart Env.</Text>
+            <Text style={[styles.techFeatureText, { color: theme.colors.text, fontSize: 11 }]}>Smart Environments</Text>
           </View>
         </View>
       </LinearGradient>
