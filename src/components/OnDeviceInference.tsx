@@ -10,6 +10,7 @@ import {
   Switch,
 } from 'react-native';
 import { Audio } from 'expo-av';
+import { INTERRUPTION_MODE_IOS_DO_NOT_MIX, INTERRUPTION_MODE_ANDROID_DO_NOT_MIX } from './AudioConstants';
 import { Ionicons } from '@expo/vector-icons';
 
 interface InferenceResult {
@@ -77,8 +78,8 @@ const OnDeviceInference: React.FC = () => {
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
           staysActiveInBackground: true,
-          interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-          interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX_WITH_OTHERS,
+          interruptionModeIOS: INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+          interruptionModeAndroid: INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
           shouldDuckAndroid: true,
           playThroughEarpieceAndroid: false,
         });
@@ -132,16 +133,16 @@ const OnDeviceInference: React.FC = () => {
       await recording.prepareToRecordAsync({
         android: {
           extension: '.wav',
-          outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_PCM_16BIT,
-          audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_PCM_16BIT,
+          outputFormat: Audio.AndroidOutputFormat.DEFAULT, // or another valid value such as THREE_GPP, MPEG_4, etc.
+          audioEncoder: Audio.AndroidAudioEncoder.DEFAULT, // or another valid value such as AAC, AMR_NB, etc.
           sampleRate: 22050,
           numberOfChannels: 1,
           bitRate: 128000,
         },
         ios: {
           extension: '.wav',
-          outputFormat: Audio.RECORDING_OPTION_IOS_OUTPUT_FORMAT_LINEARPCM,
-          audioQuality: Audio.RECORDING_OPTION_IOS_AUDIO_QUALITY_HIGH,
+          outputFormat: Audio.IOSOutputFormat.LINEARPCM, // or another valid value such as AAC, etc.
+          audioQuality: Audio.IOSAudioQuality.HIGH,
           sampleRate: 22050,
           numberOfChannels: 1,
           bitRate: 128000,

@@ -1,1 +1,1 @@
-../test_audio/airport/airport-barcelona-203-6122-0-b.wav
+../test_audio/shopping_mall/shopping_mall-barcelona-254-7607-0-b.wav

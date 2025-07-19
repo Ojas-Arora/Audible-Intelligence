@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Clock, Filter, Search, MoveVertical as MoreVertical, Calendar, TrendingUp, Activity, ChartBar as BarChart3, Zap, Eye, CircleCheck as CheckCircle, CircleAlert as AlertCircle, Volume2 } from 'lucide-react-native';
 import { useLiveEvents } from '@/hooks/useLiveEvents';
 import { useTheme } from '@/components/ThemeProvider';
+import { getFriendlyLabel, getCategory } from '@/components/EventLabelMap';
 
 const { width } = Dimensions.get('window');
 
@@ -105,7 +106,7 @@ const EventCard = ({ event, theme, index }: { event: any; theme: any; index: num
           </View>
           <View style={styles.eventInfo}>
             <Text style={[styles.eventType, { color: theme.colors.text }]}>
-              {event.type.replace(/_/g, ' ').toUpperCase()}
+              {getFriendlyLabel(event.type)}
             </Text>
             <View style={styles.eventMeta}>
               <Clock size={12} color={theme.colors.textSecondary} />

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Mic, MicOff, Zap, Shield, Volume2, TriangleAlert as AlertTriangle, Brain, Activity, Play, Pause, Settings, TrendingUp, Eye, Lock, Bell, BellOff } from 'lucide-react-native';
 import { useTheme } from '@/components/ThemeProvider';
+import { getFriendlyLabel, getCategory } from '@/components/EventLabelMap';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { useLiveEvents } from '@/hooks/useLiveEvents';
 
@@ -130,10 +131,10 @@ const EventCard = ({ event, theme, delay = 0 }: any) => {
 
           <View style={styles.eventInfo}>
             <Text style={[styles.eventType, { color: theme.colors.text }]}>
-              {event.type.replace('_', ' ').toUpperCase()}
+              {getFriendlyLabel(event.type)}
             </Text>
             <Text style={[styles.eventCategory, { color: theme.colors.textSecondary }]}>
-              {event.category}
+              {getCategory(event.type)}
             </Text>
           </View>
           <View style={[styles.confidenceBadge, { backgroundColor: theme.colors.success + '20' }]}>
@@ -267,7 +268,7 @@ export default function DetectionScreen() {
           type: detectedType,
           confidence,
           timestamp: new Date(),
-          category: getCategoryForEvent(detectedType)
+          category: getCategory(detectedType)
         };
 
         setCurrentEvent(event);
@@ -308,7 +309,7 @@ const stopDetection = () => {
     }
 
     const title = `Audio Event Detected`;
-    const message = `${event.type.replace('_', ' ').toUpperCase()} detected with ${Math.round(event.confidence * 100)}% confidence`;
+    const message = `${getFriendlyLabel(event.type)} detected with ${Math.round(event.confidence * 100)}% confidence`;
     
     console.log('📢 SHOWING NOTIFICATION:', { 
       title, 
@@ -847,10 +848,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
-  },
-  eventIcon: {
-    fontSize: 32,
-    marginRight: 16,
   },
   eventInfo: {
     flex: 1,
