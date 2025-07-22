@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Audio } from 'expo-av';
+import * as Haptics from 'expo-haptics';
 import {
   View,
   Text,
@@ -277,6 +278,11 @@ export default function DetectionScreen() {
         }
         addEvent(event);
         showNotification(event);
+        
+        // Trigger haptic feedback if enabled in settings
+        if (settings.hapticFeedback) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        }
         setDetectionStats(prev => ({
           totalEvents: prev.totalEvents + 1,
           avgConfidence: (prev.avgConfidence * prev.totalEvents + confidence) / (prev.totalEvents + 1),
