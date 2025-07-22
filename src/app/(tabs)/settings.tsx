@@ -275,37 +275,73 @@ export default function SettingsScreen() {
     </SettingCard>
   );
 
-  const InfoModal = ({ title, content, visible, onClose }: {
+  interface InfoModalProps {
     title: string;
-    content: string;
+    content: React.ReactNode | string;
     visible: boolean;
     onClose: () => void;
-  }) => (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent, { backgroundColor: theme.colors.card }]}>
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{title}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.modalClose}>
-              <X size={24} color={theme.colors.textSecondary} />
+  }
+
+  const InfoModal = ({ title, content, visible, onClose }: InfoModalProps) => {
+    const renderContent = () => {
+      if (typeof content === 'string') {
+        return <Text style={[styles.modalText, { color: theme.colors.text }]}>{content}</Text>;
+      }
+      return content;
+    };
+
+    return (
+      <Modal
+        visible={visible}
+        transparent
+        animationType="fade"
+        onRequestClose={onClose}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { 
+            backgroundColor: theme.colors.card,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5,
+          }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.colors.text }]}>{title}</Text>
+              <TouchableOpacity 
+                onPress={onClose} 
+                style={styles.modalClose}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <X size={20} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView 
+              style={styles.modalBody}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingRight: 4 }}
+            >
+              {renderContent()}
+            </ScrollView>
+            <TouchableOpacity 
+              style={[styles.modalButton, { 
+                backgroundColor: theme.colors.primary,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
+              }]}
+              onPress={onClose}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.modalButtonText, { color: '#fff' }]}>Got it</Text>
             </TouchableOpacity>
           </View>
-          <Text style={[styles.modalText, { color: theme.colors.textSecondary }]}>{content}</Text>
-          <TouchableOpacity 
-            style={[styles.modalButton, { backgroundColor: theme.colors.primary }]}
-            onPress={onClose}
-          >
-            <Text style={styles.modalButtonText}>Got it</Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </Modal>
-  );
+      </Modal>
+    );
+  };
 
   const renderContent = () => (
     <ScrollView 
@@ -456,7 +492,7 @@ export default function SettingsScreen() {
         <SettingCard
           icon={<Info />}
           title="App Version"
-          description="1.0.0 (PyTorch Mobile Optimized)"
+          description="1.0.0 (Expo + React Native)"
           onPress={() => setActiveModal('version')}
           showArrow
         />
@@ -473,26 +509,29 @@ export default function SettingsScreen() {
       {/* Model Information */}
       <LinearGradient
         colors={theme.gradients.card}
-        style={styles.modelCard}
+        style={[styles.modelCard, { marginBottom: 24 }]}
       >
         <View style={styles.modelHeader}>
           <Zap size={24} color={theme.colors.primary} />
-          <Text style={[styles.modelTitle, { color: theme.colors.text }]}>AI Model Info</Text>
+          <Text style={[styles.modelTitle, { color: theme.colors.text }]}>Sound Detection Model</Text>
         </View>
         <View style={styles.modelStats}>
           <View style={styles.modelStat}>
-            <Text style={[styles.modelStatValue, { color: theme.colors.primary }]}>1.8 MB</Text>
-            <Text style={[styles.modelStatLabel, { color: theme.colors.textSecondary }]}>Model Size</Text>
+            <Text style={[styles.modelStatValue, { color: theme.colors.primary }]}>5</Text>
+            <Text style={[styles.modelStatLabel, { color: theme.colors.textSecondary }]}>Sound Classes</Text>
           </View>
           <View style={styles.modelStat}>
-            <Text style={[styles.modelStatValue, { color: theme.colors.primary }]}>~8ms</Text>
-            <Text style={[styles.modelStatLabel, { color: theme.colors.textSecondary }]}>Inference</Text>
+            <Text style={[styles.modelStatValue, { color: theme.colors.primary }]}>Custom</Text>
+            <Text style={[styles.modelStatLabel, { color: theme.colors.textSecondary }]}>Model Type</Text>
           </View>
           <View style={styles.modelStat}>
-            <Text style={[styles.modelStatValue, { color: theme.colors.primary }]}>12</Text>
-            <Text style={[styles.modelStatLabel, { color: theme.colors.textSecondary }]}>Event Types</Text>
+            <Text style={[styles.modelStatValue, { color: theme.colors.primary }]}>On-Device</Text>
+            <Text style={[styles.modelStatLabel, { color: theme.colors.textSecondary }]}>Processing</Text>
           </View>
         </View>
+        <Text style={[styles.modelDescription, { color: theme.colors.textSecondary, marginTop: 12, fontSize: 13, lineHeight: 18 }]}>
+          Detects: Airport, Bus, Metro, Park, and Shopping Mall sounds
+        </Text>
       </LinearGradient>
 
       {/* Modals */}
@@ -505,21 +544,68 @@ export default function SettingsScreen() {
 
       <InfoModal
         title="On-Device Processing"
-        content="All audio analysis is performed locally on your device using optimized AI models. This ensures your audio data never leaves your device, providing maximum privacy and security while enabling real-time detection."
+        content="All audio analysis is performed locally on your device. No audio data is sent to external servers, ensuring your privacy and security while enabling real-time sound detection."
         visible={activeModal === 'processing'}
         onClose={() => setActiveModal(null)}
       />
 
       <InfoModal
         title="Version Information"
-        content="AudioSense v1.0.0\n\nBuilt with PyTorch Mobile for on-device inference. Features include real-time audio detection, privacy-preserving processing, and federated learning capabilities."
+        content={
+          <View style={{ width: '100%' }}>
+            <Text style={{ 
+              fontWeight: 'bold', 
+              fontSize: 16, 
+              marginBottom: 16,
+              color: theme.colors.text 
+            }}>
+              AudioSense v1.0.0
+            </Text>
+            <Text style={{ marginBottom: 12, color: theme.colors.text }}>
+              Built with:
+            </Text>
+            <Text style={{ marginBottom: 8, color: theme.colors.text }}>
+              • Expo (React Native)
+            </Text>
+            <Text style={{ marginBottom: 8, color: theme.colors.text }}>
+              • React.js
+            </Text>
+            <Text style={{ marginBottom: 8, color: theme.colors.text }}>
+              • Custom audio processing
+            </Text>
+            <Text style={{ marginTop: 12, fontSize: 14, color: theme.colors.textSecondary, lineHeight: 20 }}>
+              © 2025 AudioSense All rights reserved.
+            </Text>
+          </View>
+        }
         visible={activeModal === 'version'}
         onClose={() => setActiveModal(null)}
       />
 
       <InfoModal
         title="Help & Support"
-        content="Need help? Here are some quick tips:\n\n• Adjust sensitivity for better detection\n• Enable auto-detection for convenience\n• Check privacy settings for data control\n• Use background processing for continuous monitoring\n\nFor more help, contact support through the app store."
+        content={
+          <View style={{ width: '100%' }}>
+            <Text style={{ marginBottom: 16, color: theme.colors.text }}>
+              Need help? Here are some quick tips:
+            </Text>
+            <Text style={{ marginBottom: 8, color: theme.colors.text }}>
+              • Toggle between dark/light mode for better visibility in different lighting
+            </Text>
+            <Text style={{ marginBottom: 8, color: theme.colors.text }}>
+              • Enable auto-detection for continuous monitoring
+            </Text>
+            <Text style={{ marginBottom: 8, color: theme.colors.text }}>
+              • Adjust confidence threshold for better accuracy
+            </Text>
+            <Text style={{ marginBottom: 16, color: theme.colors.text }}>
+              • Allow microphone access for sound detection
+            </Text>
+            <Text style={{ fontSize: 14, color: theme.colors.textSecondary, lineHeight: 20 }}>
+              For additional support, please contact our team.
+            </Text>
+          </View>
+        }
         visible={activeModal === 'help'}
         onClose={() => setActiveModal(null)}
       />
@@ -715,14 +801,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
+    padding: 16,
   },
   modalContent: {
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: 16,
+    padding: 20,
     width: '100%',
     maxWidth: 400,
-    maxHeight: height * 0.8,
+    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -731,25 +817,40 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
+    flex: 1,
+    paddingRight: 8,
   },
   modalClose: {
     padding: 4,
+    marginLeft: 8,
   },
   modalText: {
     fontSize: 16,
     lineHeight: 24,
-    marginBottom: 24,
+    color: 'inherit',
+  },
+  modalBody: {
+    width: '100%',
+    marginBottom: 16,
+    maxHeight: '70%',
   },
   modalButton: {
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     alignItems: 'center',
+    marginTop: 8,
   },
   modalButtonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  modelDescription: {
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
