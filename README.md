@@ -52,6 +52,25 @@ This guide will help you set up and run the Audible Intelligence app for both we
   ```bash
   npm install -g expo-cli
   ```
+- **Python** (3.8 or above recommended)
+- **pip** (Python package manager)
+
+#### For Backend (Python) Setup:
+a) Navigate to the backend directory:
+   ```bash
+   cd src/send
+   ```
+b) Install the required Python packages:
+   ```bash
+   pip install -r requirements.txt
+   ```
+   This will install all necessary dependencies including:
+   - numpy
+   - tensorflow
+   - soundfile
+   - librosa
+   - matplotlib
+   - opencv-python
 
 ### 2. Clone the Repository
 ```bash
@@ -72,7 +91,7 @@ yarn install
 To enable real-time audio detection, you need to run both the frontend (Expo app) and the backend prediction API simultaneously.
 
 #### Terminal 1: Start the Frontend (Web or Mobile)
-- For Web:
+#### a) For Web:
   ```bash
   npx expo start -c
 
@@ -80,11 +99,35 @@ To enable real-time audio detection, you need to run both the frontend (Expo app
 - Open the browser link provided in the terminal by typing w in the terminal.
 
 #### b) For Android/iOS (Mobile):
-  ```bash
-  npx expo start -c
-  ```
-  - Scan the QR code with the Expo Go app (available on Google Play Store / Apple App Store).
-  - The app will launch on your device.
+1. **Install Expo Go** on your mobile device:
+   - [Android (Google Play Store)](https://play.google.com/store/apps/details?id=host.exp.exponent)
+   - [iOS (App Store)](https://apps.apple.com/app/expo-go/id982107779)
+
+2. **Find your computer's IPv4 address**:
+   - Windows: Open Command Prompt and type `ipconfig`
+   - Mac/Linux: Open Terminal and type `ifconfig | grep "inet " | grep -v 127.0.0.1`
+   - Look for your local IP address (typically starts with 192.168.x.x or 10.0.x.x)
+
+3. **Set the development server IP** (replace 192.168.x.x with your actual IP):
+   ```bash
+   # On Windows (PowerShell):
+   $env:REACT_NATIVE_PACKAGER_HOSTNAME="192.168.x.x"
+   
+   # On Mac/Linux:
+   export REACT_NATIVE_PACKAGER_HOSTNAME="192.168.x.x"
+   ```
+
+4. **Start the Expo development server**:
+   ```bash
+   npx expo start -c
+   ```
+   - Scan the QR code with Expo Go app
+   - The app will connect to your development server
+
+5. **Update API Endpoints**:
+   - Open `src/app/(tabs)/detection.tsx`
+   - Find and replace `http://192.168.29.32:5001` with `http://YOUR_IP:5001`
+   - This ensures the mobile app can connect to your backend server
 
 #### Terminal 2: Start the Backend Prediction API
 1. Open a new terminal window.

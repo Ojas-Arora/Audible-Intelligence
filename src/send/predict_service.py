@@ -52,7 +52,7 @@ def predict_image(image_path, model_path):
     output_float = output_scale * (output_data.astype(np.float32) - output_zero_point)
     predicted_index = np.argmax(output_float[0])
     predicted_confidence = float(np.max(output_float[0]))
-    predicted_label = CLASS_NAMES[predicted_index] if predicted_confidence >= 0.75 else 'unknown'
+    predicted_label = CLASS_NAMES[predicted_index] if predicted_confidence >= 0.5 else 'unknown'
     return predicted_label, predicted_confidence
 
 def main():
